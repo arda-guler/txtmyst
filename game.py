@@ -16,8 +16,11 @@ current_map_name = None
 current_message = None
 current_message_timer = 0
 lightning = False
+
+# cheats :)
 invulnerability = False
 no_locks = False
+night_vision = False
 
 frame_clock = 0
 
@@ -326,14 +329,16 @@ def updateEnemies():
     # ghost is not dormant and player is not hiding
     if (ghost_a.dormant == False and not
         current_map.data[player.pos[0]][player.pos[1]] == "t"):
-        if abs(ghost_a.pos[0] - player.pos[0]) > 1:
+        if (abs(ghost_a.pos[0] - player.pos[0]) > 1 and
+            random.uniform(0,10) > 3): # stall the ghost randomly so player has a chance to escape
 
             if player.pos[0] > ghost_a.pos[0]: 
                 ghost_a.pos[0] += 1
             else:
                 ghost_a.pos[0] -= 1
 
-        if abs(ghost_a.pos[1] - player.pos[1]) > 1:
+        if (abs(ghost_a.pos[1] - player.pos[1]) > 1 and
+            random.uniform(0,10) > 3): # stall the ghost randomly so player has a chance to escape
 
             if player.pos[1] > ghost_a.pos[1]: 
                 ghost_a.pos[1] += 1
@@ -341,7 +346,8 @@ def updateEnemies():
                 ghost_a.pos[1] -= 1
 
     # player is hidden
-    elif ghost_a.dormant == False and current_map.data[player.pos[0]][player.pos[1]] == "t":
+    elif (ghost_a.dormant == False and current_map.data[player.pos[0]][player.pos[1]] == "t" and
+          random.uniform(0,10) > 3):
         # random y movement
         if ghost_a.pos[0] <= 0:
             ghost_a.pos[0] += random.randint(0,1)
@@ -401,7 +407,7 @@ def playerDamage():
 # print loaded map, player, items, decorations, everything
 
 def updateMap():
-    global current_map, player, ghost_a, doll_a
+    global current_map, player, ghost_a, doll_a, night_vision
 
     updateEnemies()
 
@@ -411,7 +417,7 @@ def updateMap():
         line = ""
         for x in range(current_map.size[1]):
             this_char = current_map.data[y][x]
-            if not (current_map.dark and ((player.pos[0] - y)**2 + (player.pos[1] - x)**2)**0.5 > 4):
+            if not (current_map.dark and ((player.pos[0] - y)**2 + (player.pos[1] - x)**2)**0.5 > 4) or night_vision:
 
                 # pass-below chars
                 if this_char == "o":
@@ -430,7 +436,8 @@ def updateMap():
                     line += "#"
 
                 # keys
-                elif this_char == "1" or this_char == "2" or this_char == "3" or this_char == "4":
+                elif (this_char == "1" or this_char == "2" or this_char == "3" or this_char == "4" or
+                      this_char == "5" or this_char == "6" or this_char == "7" or this_char == "8"):
                     if not (this_char in player.inventory):
                         line += "+"
                     else:
@@ -502,13 +509,7 @@ def flush_input():
 
 def main():
     global current_map, player, current_message, current_message_timer, frame_clock,\
-           invulnerability, no_locks
-    
-    loadEpisode("E1")
-
-    initSound()
-    playBGM("bgm1")
-    playSfx("thunder", -1, 6, 0.3)
+           invulnerability, no_locks, night_vision
     
     while True:
         frame_up_cmd = False
@@ -539,6 +540,7 @@ def main():
             next_char = current_map.data[player.pos[0] - 1][player.pos[1]]
             if (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
+                next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
                 next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
                 frame_movement[0] -= 1
                 
@@ -551,6 +553,7 @@ def main():
             next_char = current_map.data[player.pos[0] + 1][player.pos[1]]
             if (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
+                next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
                 next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
                 frame_movement[0] += 1
                 
@@ -563,6 +566,7 @@ def main():
             next_char = current_map.data[player.pos[0]][player.pos[1] + 1]
             if (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
+                next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
                 next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
                 frame_movement[1] += 1
                 
@@ -575,6 +579,7 @@ def main():
             next_char = current_map.data[player.pos[0]][player.pos[1] - 1]
             if (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
+                next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
                 next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
                 frame_movement[1] -= 1
                 
@@ -588,6 +593,7 @@ def main():
             next_char = current_map.data[player.pos[0] + frame_movement[0]][player.pos[1] + frame_movement[1]]
             if not (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
+                next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
                 next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
                 frame_movement = [0, 0]
             
@@ -597,7 +603,8 @@ def main():
         # is the player on a key?
         player_on = current_map.data[player.pos[0]][player.pos[1]]
 
-        if (player_on == "1" or player_on == "2" or player_on == "3" or player_on == "4"):
+        if (player_on == "1" or player_on == "2" or player_on == "3" or player_on == "4" or
+            player_on == "5" or player_on == "6" or player_on == "7" or player_on == "8"):
             if not (player_on in player.inventory):
                 playSfx("pickup", channel=1)
                 player.inventory.append(player_on)
@@ -608,7 +615,8 @@ def main():
         lightningStrike()
         updateMap()
         updateMessage()
-        
+
+        # player wants to enter a command
         if frame_cmd:
             flush_input()
             cmd = input("\n > ")
@@ -627,7 +635,8 @@ def main():
             elif cmd == "inventory" or cmd == "i":
                 inv_list = []
                 for item in player.inventory:
-                    if item == "1" or item == "2" or item == "3" or item == "4":
+                    if (item == "1" or item == "2" or item == "3" or item == "4" or
+                        item == "5" or item == "6" or item == "7" or item == "8"):
                         inv_list.append(current_episode_keys[int(item) - 1])
                     else:
                         inv_list.append(item)
@@ -640,15 +649,20 @@ def main():
                 print("\nCONTROLS: WASD to move, t to enter command.")
                 input("\n\nPress Enter to continue...")
 
-            elif cmd == "iddqd":
+            elif cmd == "agdqd":
                 invulnerability = not invulnerability
                 frame_clock = 1
                 print("\n:)")
                 pygame.time.wait(1000)
 
-            elif cmd == "idkfa":
+            elif cmd == "agkfa":
                 no_locks = not no_locks
                 print("\n:)")
+                pygame.time.wait(1000)
+
+            elif cmd == "agbehold":
+                night_vision = not night_vision
+                print("\nB)")
                 pygame.time.wait(1000)
 
             elif cmd == "quit" or cmd == "q":
@@ -662,8 +676,13 @@ def main():
     pygame.time.wait(3000)
     pygame.quit()
 
-main()
+def startGame():
+    
+    initSound()
+    loadEpisode("E1")
+    playBGM("bgm1")
+    playSfx("thunder", -1, 6, 0.3)
 
+    main()
 
-
-
+startGame()
