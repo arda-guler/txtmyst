@@ -6,12 +6,20 @@ import random
 
 from sound import *
 
+#-----------------------------------
+#  INITIALIZATION AND DEFINITIONS
+#-----------------------------------
+
 current_episode = "E1"
 current_episode_keys = []
 current_map_name = None
 current_message = None
 current_message_timer = 0
 lightning = False
+invulnerability = False
+no_locks = False
+
+frame_clock = 0
 
 # this is so that we don't read property lines as data
 # when loading new maps
@@ -39,15 +47,41 @@ class gameMap:
         self.desc = desc
 
 class player:
-    def __init__(self, pos, inventory):
+    def __init__(self, pos, inventory, health):
         self.pos = pos
         self.inventory = inventory
+        self.health = 100
+
+class enemy:
+    def __init__(self, pos, dormant):
+        self.pos = pos
+        self.dormant = dormant
+
+# these guys track you
+class ghost(enemy):
+    def __init__(self, pos, dormant, damage):
+        super().__init__(pos, dormant)
+        self.damage = damage
+
+# these guys teleport around you
+# trust me, I'm an expert, they do that
+class doll(enemy):
+    def __init__(self, pos, dormant, damage, tp_chance):
+        super().__init__(pos, dormant)
+        self.damage = damage
+        self.tp_chance = tp_chance
 
 current_map = gameMap(None, None, None, None, None, None,\
                       None, None, None, None, None, False, None)
-player = player([0,0], [])
 
-# read map data and properties
+player = player([0,0], [], 100)
+
+ghost_a = ghost([-1, -1], True, 10)
+doll_a = doll([-1, -1], True, 10, 5)
+
+#-----------------------------------
+#            MAP LOADER
+#-----------------------------------
 
 def loadMap(e, m):
     
@@ -58,6 +92,8 @@ def loadMap(e, m):
     loaded_map = []
     map_size = [len(map_lines) - map_property_lines, len(map_lines[0]) - 1]
 
+    enemy1, enemy2 = False, False
+
     # have a clean and sized map
     for y in range(map_size[0]):
         loaded_map.append([])
@@ -67,7 +103,20 @@ def loadMap(e, m):
     # fill map with stuff
     for y in range(map_size[0]):
         for x in range(map_size[1]):
-                loaded_map[y][x] = map_lines[y][x]
+            loaded_map[y][x] = map_lines[y][x]
+            if map_lines[y][x] == "A":
+                enemy1 = True
+                ghost_a.pos = [y,x]
+                ghost_a.dormant = False
+            elif map_lines[y][x] == "!":
+                enemy2 = True
+                doll_a.pos = [y,x]
+                doll_a.dormant = False
+
+    if not enemy1:
+        ghost_a.dormant = True
+    if not enemy2:
+        doll_a.dormant = True
 
     # when you add a new PROPERTY line, please re-check list indices
     directions = map_lines[-map_property_lines+1].split("-")
@@ -106,8 +155,8 @@ def goEast():
 
     door_num = 0
 
-    for line in current_map.data:
-        if ("e" in line) or ("E" in line):
+    for y in range(len(current_map.data)):
+        if (("e" in current_map.data[y]) or ("E" in current_map.data[y])) and y <= player.pos[0]:
             door_num += 1
     
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
@@ -130,8 +179,8 @@ def goWest():
 
     door_num = 0
 
-    for line in current_map.data:
-        if ("w" in line) or ("W" in line):
+    for y in range(len(current_map.data)):
+        if (("w" in current_map.data[y]) or ("W" in current_map.data[y])) and y <= player.pos[0]:
             door_num += 1
             
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
@@ -203,9 +252,10 @@ def goSouth():
 # just check the player's keys before letting them move to nearby maps
 
 def goEastLocked():
-    global current_map, player, current_message, current_message_timer
+    global current_map, player, current_message, current_message_timer,\
+           no_locks
 
-    if current_map.key_east in player.inventory:
+    if (current_map.key_east in player.inventory) or no_locks:
         goEast()
     else:
         playSfx("locked", channel=1)
@@ -213,9 +263,10 @@ def goEastLocked():
         current_message_timer = 15
 
 def goWestLocked():
-    global current_map, player, current_message, current_message_timer
+    global current_map, player, current_message, current_message_timer,\
+           no_locks
 
-    if current_map.key_west in player.inventory:
+    if (current_map.key_west in player.inventory) or no_locks:
         goWest()
     else:
         playSfx("locked", channel=1)
@@ -223,9 +274,10 @@ def goWestLocked():
         current_message_timer = 15
 
 def goNorthLocked():
-    global current_map, player, current_message, current_message_timer
+    global current_map, player, current_message, current_message_timer,\
+           no_locks
 
-    if current_map.key_north in player.inventory:
+    if (current_map.key_north in player.inventory) or no_locks:
         goNorth()
     else:
         playSfx("locked", channel=1)
@@ -233,9 +285,10 @@ def goNorthLocked():
         current_message_timer = 15
 
 def goSouthLocked():
-    global current_map, player, current_message, current_message_timer
+    global current_map, player, current_message, current_message_timer,\
+           no_locks
 
-    if current_map.key_south in player.inventory:
+    if (current_map.key_south in player.inventory) or no_locks:
         goSouth()
     else:
         playSfx("locked", channel=1)
@@ -267,10 +320,90 @@ def loadEpisode(e):
                 player.pos = [y, x]
                 break
 
+def updateEnemies():
+    global current_map, player, ghost_a, doll_a
+
+    # ghost is not dormant and player is not hiding
+    if (ghost_a.dormant == False and not
+        current_map.data[player.pos[0]][player.pos[1]] == "t"):
+        if abs(ghost_a.pos[0] - player.pos[0]) > 1:
+
+            if player.pos[0] > ghost_a.pos[0]: 
+                ghost_a.pos[0] += 1
+            else:
+                ghost_a.pos[0] -= 1
+
+        if abs(ghost_a.pos[1] - player.pos[1]) > 1:
+
+            if player.pos[1] > ghost_a.pos[1]: 
+                ghost_a.pos[1] += 1
+            else:
+                ghost_a.pos[1] -= 1
+
+    # player is hidden
+    elif ghost_a.dormant == False and current_map.data[player.pos[0]][player.pos[1]] == "t":
+        # random y movement
+        if ghost_a.pos[0] <= 0:
+            ghost_a.pos[0] += random.randint(0,1)
+        elif ghost_a.pos[0] >= current_map.size[0]:
+            ghost_a.pos[0] += random.randint(-1, 0)
+        else:
+            ghost_a.pos[0] += random.randint(-1, 1)
+
+        # random x movement
+        if ghost_a.pos[1] <= 0:
+            ghost_a.pos[1] += random.randint(0,1)
+        elif ghost_a.pos[1] >= current_map.size[0]:
+            ghost_a.pos[1] += random.randint(-1, 0)
+        else:
+            ghost_a.pos[1] += random.randint(-1, 1)
+
+    playerDamage()
+
+def gameOver(ending):
+
+    if ending == "death":
+        system("cls")
+        system("color 4c")
+        playBGM("death")
+        print("\n\n  YOU DIED.  \n")
+        pygame.time.wait(1000)
+        flush_input()
+        input("Your last words?: ")
+        pygame.time.wait(1000)
+        pygame.quit()
+        exit()
+
+# damage player from every possible cause
+# because there is no rest for the living
+
+def playerDamage():
+    global player, ghost_a, doll_a, frame_clock
+
+    if frame_clock % 5 == 0:
+
+        # ghost damage
+        if (abs(player.pos[0] - ghost_a.pos[0]) <= 1 and abs(player.pos[1] - ghost_a.pos[1]) <= 1 and
+            not ghost_a.dormant):
+            player.health -= ghost_a.damage
+            system("color 4")
+            playSfx("ghost", channel=2)
+
+        # doll damage
+        if (abs(player.pos[0] - doll_a.pos[0]) <= 1 and abs(player.pos[1] - doll_a.pos[1]) <= 1 and
+            not doll_a.dormant):
+            player.health -= doll_a.damage
+            system("color 4")
+
+    if player.health <= 0:
+        gameOver("death")
+
 # print loaded map, player, items, decorations, everything
 
 def updateMap():
-    global current_map, player
+    global current_map, player, ghost_a, doll_a
+
+    updateEnemies()
 
     print(current_map.name + "\n")
     
@@ -287,6 +420,10 @@ def updateMap():
                     line += "I"
                 elif this_char == "t":
                     line += "T"
+                
+                # enemies
+                elif [y,x] == ghost_a.pos and not ghost_a.dormant:
+                    line += "*"
 
                 # player
                 elif [y,x] == player.pos:
@@ -320,6 +457,10 @@ def updateMap():
                 elif (this_char == "W" or this_char == "E"
                       or this_char == "w" or this_char == "e"):
                     line += "|"
+
+                # enemy spawns
+                elif this_char == "A" or this_char == "!":
+                    line += "."
 
                 # everything else used for aesthetics
                 else:
@@ -360,7 +501,8 @@ def flush_input():
         termios.tcflush(sys.stdin, termios.TCIOFLUSH)
 
 def main():
-    global current_map, player, current_message, current_message_timer
+    global current_map, player, current_message, current_message_timer, frame_clock,\
+           invulnerability, no_locks
     
     loadEpisode("E1")
 
@@ -374,6 +516,9 @@ def main():
         frame_right_cmd = False
         frame_left_cmd = False
         frame_cmd = False
+
+        if not invulnerability:
+            frame_clock += 1
         
         if keyboard.is_pressed("w"):
             frame_up_cmd = True
@@ -394,7 +539,7 @@ def main():
             next_char = current_map.data[player.pos[0] - 1][player.pos[1]]
             if (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
-                next_char == "o" or next_char == "H" or next_char == "-"):
+                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
                 frame_movement[0] -= 1
                 
             elif next_char == "N":
@@ -406,7 +551,7 @@ def main():
             next_char = current_map.data[player.pos[0] + 1][player.pos[1]]
             if (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
-                next_char == "o" or next_char == "H" or next_char == "-"):
+                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
                 frame_movement[0] += 1
                 
             elif next_char == "S":
@@ -418,7 +563,7 @@ def main():
             next_char = current_map.data[player.pos[0]][player.pos[1] + 1]
             if (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
-                next_char == "o" or next_char == "H" or next_char == "-"):
+                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
                 frame_movement[1] += 1
                 
             elif next_char == "E":
@@ -430,7 +575,7 @@ def main():
             next_char = current_map.data[player.pos[0]][player.pos[1] - 1]
             if (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
-                next_char == "o" or next_char == "H" or next_char == "-"):
+                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
                 frame_movement[1] -= 1
                 
             elif next_char == "W":
@@ -443,7 +588,7 @@ def main():
             next_char = current_map.data[player.pos[0] + frame_movement[0]][player.pos[1] + frame_movement[1]]
             if not (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
-                next_char == "o" or next_char == "H" or next_char == "-"):
+                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
                 frame_movement = [0, 0]
             
         player.pos[0] += frame_movement[0]
@@ -490,6 +635,22 @@ def main():
                 print("\nYou have", inv_list, "in your inventory.")
                 input("Press Enter to continue...")
 
+            elif cmd == "help" or cmd == "h":
+                print("\nCOMMANDS: (e)xamine, (i)nventory, (q)uit")
+                print("\nCONTROLS: WASD to move, t to enter command.")
+                input("\n\nPress Enter to continue...")
+
+            elif cmd == "iddqd":
+                invulnerability = not invulnerability
+                frame_clock = 1
+                print("\n:)")
+                pygame.time.wait(1000)
+
+            elif cmd == "idkfa":
+                no_locks = not no_locks
+                print("\n:)")
+                pygame.time.wait(1000)
+
             elif cmd == "quit" or cmd == "q":
                 print("\nQuitting...")
                 pygame.time.wait(1000)
@@ -498,7 +659,7 @@ def main():
             
         pygame.time.wait(100)
 
-    pygame.time.wait(10000)
+    pygame.time.wait(3000)
     pygame.quit()
 
 main()
