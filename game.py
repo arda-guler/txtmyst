@@ -15,11 +15,11 @@ lightning = False
 
 # this is so that we don't read property lines as data
 # when loading new maps
-map_property_lines = 3 + 1
+map_property_lines = 4 + 1
 
 class gameMap:
     def __init__(self, data, name, size, east, west, north, south,
-                 key_east, key_west, key_north, key_south, dark):
+                 key_east, key_west, key_north, key_south, dark, desc):
         self.data = data
         self.name = name
         self.size = size
@@ -36,13 +36,15 @@ class gameMap:
 
         self.dark = dark
 
+        self.desc = desc
+
 class player:
     def __init__(self, pos, inventory):
         self.pos = pos
         self.inventory = inventory
 
 current_map = gameMap(None, None, None, None, None, None,\
-                      None, None, None, None, None, False)
+                      None, None, None, None, None, False, None)
 player = player([0,0], [])
 
 # read map data and properties
@@ -68,26 +70,29 @@ def loadMap(e, m):
                 loaded_map[y][x] = map_lines[y][x]
 
     # when you add a new PROPERTY line, please re-check list indices
-    directions = map_lines[-3].split("-")
+    directions = map_lines[-map_property_lines+1].split("-")
     loaded_map_east = directions[0]
     loaded_map_west = directions[1]
     loaded_map_north = directions[2]
     loaded_map_south = directions[3][0:-1] # do the slicing because of newline
 
-    keys = map_lines[-2].split("-")
+    keys = map_lines[-map_property_lines+2].split("-")
     loaded_map_key_east = keys[0]
     loaded_map_key_west = keys[1]
     loaded_map_key_north = keys[2]
     loaded_map_key_south = keys[3][0:-1] # do the slicing because of newline
 
-    loaded_map_dark = bool(int(map_lines[-1][0:-1]))
+    loaded_map_dark = bool(int(map_lines[-map_property_lines+3][0:-1]))
 
     loaded_map_name = m
+
+    loaded_map_desc = map_lines[-map_property_lines+4][0:-1]
 
     return loaded_map, loaded_map_name, map_size, loaded_map_east,\
            loaded_map_west, loaded_map_north, loaded_map_south,\
            loaded_map_key_east, loaded_map_key_west,\
-           loaded_map_key_north, loaded_map_key_south, loaded_map_dark
+           loaded_map_key_north, loaded_map_key_south, loaded_map_dark,\
+           loaded_map_desc
 
 #-----------------------
 # MOVING THROUGH DOORS
@@ -107,7 +112,7 @@ def goEast():
     
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark = loadMap(current_episode, current_map.east)
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_episode, current_map.east)
 
     search_num = 0
 
@@ -131,7 +136,7 @@ def goWest():
             
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark = loadMap(current_episode, current_map.west)
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc  = loadMap(current_episode, current_map.west)
 
     search_num = 0
 
@@ -155,7 +160,7 @@ def goNorth():
     
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark = loadMap(current_episode, current_map.north)
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_episode, current_map.north)
 
     search_num = 0
 
@@ -179,7 +184,7 @@ def goSouth():
     
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark = loadMap(current_episode, current_map.south)
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_episode, current_map.south)
 
     search_num = 0
 
@@ -254,7 +259,7 @@ def loadEpisode(e):
     
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark = loadMap(e, "ENTRY")
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(e, "ENTRY")
 
     for y in range(current_map.size[0]):
         for x in range(current_map.size[1]):
@@ -345,6 +350,15 @@ def lightningStrike():
         lightning = not lightning
         system("color 7")
 
+def flush_input():
+    try:
+        import msvcrt
+        while msvcrt.kbhit():
+            msvcrt.getch()
+    except ImportError:
+        import sys, termios    #for linux/unix
+        termios.tcflush(sys.stdin, termios.TCIOFLUSH)
+
 def main():
     global current_map, player, current_message, current_message_timer
     
@@ -359,6 +373,7 @@ def main():
         frame_down_cmd = False
         frame_right_cmd = False
         frame_left_cmd = False
+        frame_cmd = False
         
         if keyboard.is_pressed("w"):
             frame_up_cmd = True
@@ -368,6 +383,8 @@ def main():
             frame_right_cmd = True
         if keyboard.is_pressed("a"):
             frame_left_cmd = True
+        if keyboard.is_pressed("t"):
+            frame_cmd = True
 
         frame_movement = [0, 0] # y, x
         next_char = None
@@ -446,6 +463,39 @@ def main():
         lightningStrike()
         updateMap()
         updateMessage()
+        
+        if frame_cmd:
+            flush_input()
+            cmd = input("\n > ")
+            
+            if cmd == "examine" or cmd == "e":
+                p_desc = ""
+                for char in current_map.desc:
+                    if not char == "\\":
+                        p_desc += char
+                    else:
+                        p_desc += "\n"
+                        
+                print("\n" + p_desc + "\n")
+                input("Press Enter to continue...")
+
+            elif cmd == "inventory" or cmd == "i":
+                inv_list = []
+                for item in player.inventory:
+                    if item == "1" or item == "2" or item == "3" or item == "4":
+                        inv_list.append(current_episode_keys[int(item) - 1])
+                    else:
+                        inv_list.append(item)
+                        
+                print("\nYou have", inv_list, "in your inventory.")
+                input("Press Enter to continue...")
+
+            elif cmd == "quit" or cmd == "q":
+                print("\nQuitting...")
+                pygame.time.wait(1000)
+                pygame.quit()
+                break
+            
         pygame.time.wait(100)
 
     pygame.time.wait(10000)
