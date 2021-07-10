@@ -6,15 +6,23 @@ import random
 
 from sound import *
 
+# WARNING: WINDOWS-ONLY SYSTEM CALLS!
+#
+# For Linux friendly experience:
+#
+# 1a) Remove command line color switching calls
+# 1b) Inhibit lightningStrike() function
+# 2) Replace system("cls") with system("clear")
+
 #-----------------------------------
 #  INITIALIZATION AND DEFINITIONS
 #-----------------------------------
 
-current_episode = "E1"
-current_episode_keys = []
-current_map_name = None
+# message that appears below map
 current_message = None
 current_message_timer = 0
+
+# light blue flash
 lightning = False
 
 # cheats :)
@@ -28,6 +36,17 @@ frame_clock = 0
 # when loading new maps
 map_property_lines = 4 + 1
 
+class gameEpisode:
+    def __init__(self, name, keys, backstory, ending, map_start, map_finish):
+        self.name = name
+        self.keys = keys
+        
+        self.backstory = backstory
+        self.ending = ending
+        
+        self.map_start = map_finish
+        self.map_finish = map_finish
+        
 class gameMap:
     def __init__(self, data, name, size, east, west, north, south,
                  key_east, key_west, key_north, key_south, dark, desc):
@@ -74,6 +93,10 @@ class doll(enemy):
         self.damage = damage
         self.tp_chance = tp_chance
 
+# lets get the instances ready
+
+current_episode = gameEpisode(None, [], "", "", "", "")
+
 current_map = gameMap(None, None, None, None, None, None,\
                       None, None, None, None, None, False, None)
 
@@ -86,9 +109,17 @@ doll_a = doll([-1, -1], True, 10, 5)
 #            MAP LOADER
 #-----------------------------------
 
-def loadMap(e, m):
+def loadMap(m):
+
+    global current_episode
+
+    # if the player reached the ending, don't bother loading
+    # just show the ending instead
+    if m == current_episode.map_finish:
+        gameOver("ending")
+        return
     
-    map_path = "data/" + e + "/" + m + ".map"
+    map_path = "data/" + current_episode.name + "/" + m + ".map"
     map_file = open(map_path, "r")
     map_lines = map_file.readlines()
 
@@ -126,13 +157,13 @@ def loadMap(e, m):
     loaded_map_east = directions[0]
     loaded_map_west = directions[1]
     loaded_map_north = directions[2]
-    loaded_map_south = directions[3][0:-1] # do the slicing because of newline
+    loaded_map_south = directions[3][0:-1]
 
     keys = map_lines[-map_property_lines+2].split("-")
     loaded_map_key_east = keys[0]
     loaded_map_key_west = keys[1]
     loaded_map_key_north = keys[2]
-    loaded_map_key_south = keys[3][0:-1] # do the slicing because of newline
+    loaded_map_key_south = keys[3][0:-1]
 
     loaded_map_dark = bool(int(map_lines[-map_property_lines+3][0:-1]))
 
@@ -152,6 +183,9 @@ def loadMap(e, m):
 
 # basically, load in the new map and place player next to appropriate door
 
+# NOTE: There may be more than one door going in and out of the same room
+# so you need to check which door the player went through
+
 def goEast():
     global current_map, player
     playSfx("door", channel=1)
@@ -164,7 +198,7 @@ def goEast():
     
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_episode, current_map.east)
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_map.east)
 
     search_num = 0
 
@@ -188,7 +222,7 @@ def goWest():
             
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc  = loadMap(current_episode, current_map.west)
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc  = loadMap(current_map.west)
 
     search_num = 0
 
@@ -212,7 +246,7 @@ def goNorth():
     
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_episode, current_map.north)
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_map.north)
 
     search_num = 0
 
@@ -236,7 +270,7 @@ def goSouth():
     
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_episode, current_map.south)
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_map.south)
 
     search_num = 0
 
@@ -252,7 +286,7 @@ def goSouth():
 # MOVING THROUGH LOCKED DOORS
 #-----------------------------
 
-# just check the player's keys before letting them move to nearby maps
+# just check the player's keys before letting them move through locked doors
 
 def goEastLocked():
     global current_map, player, current_message, current_message_timer,\
@@ -298,24 +332,71 @@ def goSouthLocked():
         current_message = "LOCKED."
         current_message_timer = 15
             
-#-----------------
+#-------------------
+#  EPISODE LOADER
+#-------------------
 
 # new episode, yay!
 def loadEpisode(e):
-    global current_map, player, current_episode, current_episode_keys
+    global current_map, player, current_episode
 
-    current_episode_keys = []
+    current_episode.name = e
 
-    keys_path = "data/" + e + "/episode.keys"
+    # read backstory, ending, start and finish maps
+    # from episode.story file
+    story_path = "data/" + current_episode.name + "/episode.story"
+    story_file = open(story_path, "r")
+    story_lines = story_file.readlines()
+
+    i = 0
+    for line in story_lines:
+        i += 1
+        if line[0:10] == "MAP_START:":
+            current_episode.map_start = line[10:-1]
+        elif line[0:11] == "MAP_FINISH:":
+            current_episode.map_finish = line[11:-1]
+        elif line[0:-1] == "BACKSTORY":
+            episode_backstory_start = i
+        elif line[0:-1] == "END_BACKSTORY":
+            episode_backstory_end = i
+        elif line[0:-1] == "ENDING":
+            episode_ending_start = i
+        elif line[0:-1] == "END_ENDING":
+            episode_ending_end = i
+
+    current_episode.backstory = ""
+    for i in range(len(story_lines[episode_backstory_start:episode_backstory_end-1])):
+        current_episode.backstory += story_lines[episode_backstory_start + i]
+
+    current_episode.ending = ""
+    for i in range(len(story_lines[episode_ending_start:episode_ending_end-1])):
+        current_episode.ending += story_lines[episode_ending_start + i]
+
+    # read keys from episode.keys file
+    current_episode.keys = []
+
+    keys_path = "data/" + current_episode.name + "/episode.keys"
     keys_file = open(keys_path, "r")
     keys_lines = keys_file.readlines()
 
     for line in keys_lines:
-        current_episode_keys.append(line[0:-1])
+        current_episode.keys.append(line[0:-1])
+
+    # show controls and backstory
+    # also show controls
+    system("cls")
+    print(current_episode.backstory)
+    pygame.time.wait(3000)
+    input("Press Enter to proceed.")
+    system("cls")
+    print("Controls: WASD to move, t to enter command.\n\nEnter command 'help' to learn more.\n")
+    input("Press enter to begin.")
+    system("cls")
     
+    # place player in starting map
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(e, "ENTRY")
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_episode.map_start)
 
     for y in range(current_map.size[0]):
         for x in range(current_map.size[1]):
@@ -368,6 +449,8 @@ def updateEnemies():
 
 def gameOver(ending):
 
+    global current_episode
+
     if ending == "death":
         system("cls")
         system("color 4c")
@@ -376,6 +459,17 @@ def gameOver(ending):
         pygame.time.wait(1000)
         flush_input()
         input("Your last words?: ")
+        pygame.time.wait(1000)
+        pygame.quit()
+        exit()
+
+    elif ending == "ending":
+        system("cls")
+        #playBGM("ending")
+        print(current_episode.ending)
+        pygame.time.wait(1000)
+        flush_input()
+        input("What is the code for next episode?: ")
         pygame.time.wait(1000)
         pygame.quit()
         exit()
@@ -608,7 +702,7 @@ def main():
             if not (player_on in player.inventory):
                 playSfx("pickup", channel=1)
                 player.inventory.append(player_on)
-                current_message = "You got " + current_episode_keys[int(player_on) - 1] + "!"
+                current_message = "You got " + current_episode.keys[int(player_on) - 1] + "!"
                 current_message_timer = 25
 
         system("cls")
@@ -637,7 +731,7 @@ def main():
                 for item in player.inventory:
                     if (item == "1" or item == "2" or item == "3" or item == "4" or
                         item == "5" or item == "6" or item == "7" or item == "8"):
-                        inv_list.append(current_episode_keys[int(item) - 1])
+                        inv_list.append(current_episode.keys[int(item) - 1])
                     else:
                         inv_list.append(item)
                         
@@ -645,7 +739,7 @@ def main():
                 input("Press Enter to continue...")
 
             elif cmd == "help" or cmd == "h":
-                print("\nCOMMANDS: (e)xamine, (i)nventory, (q)uit")
+                print("\nCOMMANDS: (h)elp, (e)xamine, (i)nventory, (q)uit")
                 print("\nCONTROLS: WASD to move, t to enter command.")
                 input("\n\nPress Enter to continue...")
 
@@ -679,9 +773,9 @@ def main():
 def startGame():
     
     initSound()
+    playSfx("thunder", -1, 6, 0.3)
     loadEpisode("E1")
     playBGM("bgm1")
-    playSfx("thunder", -1, 6, 0.3)
 
     main()
 
