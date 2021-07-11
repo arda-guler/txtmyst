@@ -44,7 +44,7 @@ class gameEpisode:
         self.backstory = backstory
         self.ending = ending
         
-        self.map_start = map_finish
+        self.map_start = map_start
         self.map_finish = map_finish
         
 class gameMap:
