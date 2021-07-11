@@ -541,16 +541,6 @@ def updateMap():
                 elif this_char == "." or this_char == "P":
                     line += "."
 
-                # obstacles
-                elif this_char == "O":
-                    line += "O"
-                elif this_char == "I":
-                    line += "I"
-                elif this_char == "T":
-                    line += "T"
-                elif this_char == " ":
-                    line += " "
-
                 # doors
                 elif (this_char == "N" or this_char == "S"
                       or this_char == "n" or this_char == "s"):
@@ -563,7 +553,7 @@ def updateMap():
                 elif this_char == "A" or this_char == "!":
                     line += "."
 
-                # everything else used for aesthetics
+                # everything else used for aesthetics and obstacles
                 else:
                     line += this_char
             else:
