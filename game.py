@@ -503,6 +503,11 @@ def updateEnemies():
                     if s.pos[0] == statue.pos[0] + statue_movement[0] and s.pos[1] == statue.pos[1] + statue_movement[1]:
                         statue_movement = [0, 0]
 
+            # make sound when moving
+            if not statue_movement == [0, 0]:
+                rand_num = random.randint(1,4)
+                playSfx("statue" + str(rand_num), channel=2+rand_num)
+
             statue.pos[0] += statue_movement[0]
             statue.pos[1] += statue_movement[1]
 
