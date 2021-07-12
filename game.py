@@ -93,6 +93,12 @@ class doll(enemy):
         self.damage = damage
         self.tp_chance = tp_chance
 
+# these guys are moving obstacles
+class statue(enemy):
+    def __init__(self, pos, dormant, move_rate):
+        super().__init__(pos, dormant)
+        self.move_rate = move_rate
+
 # lets get the instances ready
 
 current_episode = gameEpisode(None, [], "", "", "", "")
@@ -104,6 +110,18 @@ player = player([0,0], [], 100)
 
 ghost_a = ghost([-1, -1], True, 10)
 doll_a = doll([-1, -1], True, 10, 5)
+statue_a = statue([-5, -5], True, 0.2)
+statue_b = statue([-5, -5], True, 0.2)
+statue_c = statue([-5, -5], True, 0.2)
+statue_d = statue([-5, -5], True, 0.2)
+
+statues = [statue_a, statue_b, statue_c, statue_d]
+
+def sign(number):
+    if number >= 0:
+        return 1
+    else:
+        return -1
 
 #-----------------------------------
 #            MAP LOADER
@@ -111,7 +129,7 @@ doll_a = doll([-1, -1], True, 10, 5)
 
 def loadMap(m):
 
-    global current_episode
+    global current_episode, ghost_a, statues
 
     # if the player reached the ending, don't bother loading
     # just show the ending instead
@@ -126,7 +144,8 @@ def loadMap(m):
     loaded_map = []
     map_size = [len(map_lines) - map_property_lines, len(map_lines[0]) - 1]
 
-    enemy1, enemy2 = False, False
+    has_ghost, num_of_statues = False, 0
+    statue_positions = []
 
     # have a clean and sized map
     for y in range(map_size[0]):
@@ -139,18 +158,23 @@ def loadMap(m):
         for x in range(map_size[1]):
             loaded_map[y][x] = map_lines[y][x]
             if map_lines[y][x] == "A":
-                enemy1 = True
+                has_ghost = True
                 ghost_a.pos = [y,x]
                 ghost_a.dormant = False
             elif map_lines[y][x] == "!":
-                enemy2 = True
-                doll_a.pos = [y,x]
-                doll_a.dormant = False
+                num_of_statues += 1
+                statue_positions.append([y,x])
 
-    if not enemy1:
+    if not has_ghost:
         ghost_a.dormant = True
-    if not enemy2:
-        doll_a.dormant = True
+
+    for i in range(4):
+        if num_of_statues > 0:
+            statues[i].dormant = False
+            statues[i].pos = statue_positions[i]
+        else:
+            statues[i].dormant = True
+        num_of_statues -= 1
 
     # when you add a new PROPERTY line, please re-check list indices
     directions = map_lines[-map_property_lines+1].split("-")
@@ -405,7 +429,9 @@ def loadEpisode(e):
                 break
 
 def updateEnemies():
-    global current_map, player, ghost_a, doll_a
+    global current_map, player, ghost_a, doll_a, statues
+
+    # --- GHOST MECHANICS ---
 
     # ghost is not dormant and player is not hiding
     if (ghost_a.dormant == False and not
@@ -444,6 +470,43 @@ def updateEnemies():
             ghost_a.pos[1] += random.randint(-1, 0)
         else:
             ghost_a.pos[1] += random.randint(-1, 1)
+
+    # --- STATUE MECHANICS ---
+    
+    for statue in statues:
+        if (statue.dormant == False and not
+            current_map.data[player.pos[0]][player.pos[1]] == "t" and
+            (frame_clock % 4) == 0): # these guys are rather slow
+
+            statue_movement = [0, 0]
+            
+            if (abs(statue.pos[0] - player.pos[0]) > 1):
+                statue_next_char = (current_map.data[statue.pos[0] - sign(statue.pos[0] - player.pos[0])][statue.pos[1]])
+                if (statue_next_char == "." or statue_next_char == "." or statue_next_char == "o" or statue_next_char == "i" or
+                    statue_next_char == "P" or statue_next_char == "A"):
+                    statue_movement[0] = - sign(statue.pos[0] - player.pos[0])
+            if (abs(statue.pos[1] - player.pos[1]) > 1):
+                statue_next_char = current_map.data[statue.pos[0]][statue.pos[1] - sign(statue.pos[1] - player.pos[1])]
+                if (statue_next_char == "." or statue_next_char == "." or statue_next_char == "o" or statue_next_char == "i" or
+                    statue_next_char == "P" or statue_next_char == "A"):
+                    statue_movement[1] = - sign(statue.pos[1] - player.pos[1])
+
+            if (not statue_movement[0] == 0) and (not statue_movement[1] == 0):
+                statue_next_char = current_map.data[statue.pos[0] + statue_movement[0]][statue.pos[1] + statue_movement[1]]
+                if not (statue_next_char == "." or statue_next_char == "." or statue_next_char == "o" or statue_next_char == "i" or
+                    statue_next_char == "P" or statue_next_char == "A"):
+                    statue_movement = [0, 0]
+
+            # don't move onto other statues
+            for s in statues:
+                if not s == statue and not statue.dormant:
+                    if s.pos[0] == statue.pos[0] + statue_movement[0] and s.pos[1] == statue.pos[1] + statue_movement[1]:
+                        statue_movement = [0, 0]
+
+            statue.pos[0] += statue_movement[0]
+            statue.pos[1] += statue_movement[1]
+
+            # they can get blocked by obstacles, that's on purpose
 
     playerDamage()
 
@@ -495,13 +558,15 @@ def playerDamage():
             player.health -= doll_a.damage
             system("color 4")
 
+        # note: statues don't deal damage
+
     if player.health <= 0:
         gameOver("death")
 
 # print loaded map, player, items, decorations, everything
 
 def updateMap():
-    global current_map, player, ghost_a, doll_a, night_vision
+    global current_map, player, ghost_a, doll_a, night_vision, statues
 
     updateEnemies()
 
@@ -522,9 +587,20 @@ def updateMap():
                     line += "T"
                 
                 # enemies
+                    # ghost
                 elif [y,x] == ghost_a.pos and not ghost_a.dormant:
                     line += "*"
 
+                    #statue
+                elif [y,x] == statues[0].pos and not statues[0].dormant:
+                    line += "I"
+                elif [y,x] == statues[1].pos and not statues[1].dormant:
+                    line += "I"
+                elif [y,x] == statues[2].pos and not statues[2].dormant:
+                    line += "I"
+                elif [y,x] == statues[3].pos and not statues[3].dormant:
+                    line += "I"
+                        
                 # player
                 elif [y,x] == player.pos:
                     line += "#"
@@ -593,7 +669,7 @@ def flush_input():
 
 def main():
     global current_map, player, current_message, current_message_timer, frame_clock,\
-           invulnerability, no_locks, night_vision
+           invulnerability, no_locks, night_vision, statues
     
     while True:
         frame_up_cmd = False
@@ -625,7 +701,8 @@ def main():
             if (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
                 next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
-                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
+                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A" or
+                next_char == "!"):
                 frame_movement[0] -= 1
                 
             elif next_char == "N":
@@ -638,7 +715,8 @@ def main():
             if (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
                 next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
-                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
+                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A" or
+                next_char == "!"):
                 frame_movement[0] += 1
                 
             elif next_char == "S":
@@ -651,7 +729,8 @@ def main():
             if (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
                 next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
-                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
+                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A" or
+                next_char == "!"):
                 frame_movement[1] += 1
                 
             elif next_char == "E":
@@ -664,7 +743,8 @@ def main():
             if (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
                 next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
-                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
+                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A" or
+                next_char == "!"):
                 frame_movement[1] -= 1
                 
             elif next_char == "W":
@@ -678,8 +758,16 @@ def main():
             if not (next_char == "." or next_char == "P" or next_char == "i" or next_char == "t" or
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
                 next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
-                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A"):
+                next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A" or
+                next_char == "!"):
                 frame_movement = [0, 0]
+
+        # player can't get past statues directly, but he can squish through corners
+        if not statues[0].dormant:
+            for statue in statues:
+                if not statue.dormant:
+                    if statue.pos[0] == player.pos[0] + frame_movement[0] and statue.pos[1] == player.pos[1] + frame_movement[1]:
+                        frame_movement = [0, 0]
             
         player.pos[0] += frame_movement[0]
         player.pos[1] += frame_movement[1]
