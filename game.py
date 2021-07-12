@@ -598,17 +598,18 @@ def updateMap():
 
                     #statue
                 elif [y,x] == statues[0].pos and not statues[0].dormant:
-                    line += "I"
+                    line += "İ"
                 elif [y,x] == statues[1].pos and not statues[1].dormant:
-                    line += "I"
+                    line += "İ"
                 elif [y,x] == statues[2].pos and not statues[2].dormant:
-                    line += "I"
+                    line += "İ"
                 elif [y,x] == statues[3].pos and not statues[3].dormant:
-                    line += "I"
+                    line += "İ"
                         
                 # player
                 elif [y,x] == player.pos:
-                    line += "#"
+                    #line += "╦"
+                    line += "¡"
 
                 # keys
                 elif (this_char == "1" or this_char == "2" or this_char == "3" or this_char == "4" or
@@ -674,7 +675,7 @@ def flush_input():
 
 def main():
     global current_map, player, current_message, current_message_timer, frame_clock,\
-           invulnerability, no_locks, night_vision, statues
+           invulnerability, no_locks, night_vision, statues, current_episode
     
     while True:
         frame_up_cmd = False
@@ -822,9 +823,14 @@ def main():
                 input("Press Enter to continue...")
 
             elif cmd == "help" or cmd == "h":
-                print("\nCOMMANDS: (h)elp, (e)xamine, (i)nventory, (q)uit")
+                print("\nCOMMANDS: (h)elp, (e)xamine, (i)nventory, (r)estart, (q)uit")
                 print("\nCONTROLS: WASD to move, t to enter command.")
                 input("\n\nPress Enter to continue...")
+
+            elif cmd == "restart" or cmd == "r":
+                print("\nRestarting episode...")
+                pygame.time.wait(1000)
+                loadEpisode(current_episode.name)
 
             elif cmd == "agdqd":
                 invulnerability = not invulnerability
