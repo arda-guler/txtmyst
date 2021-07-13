@@ -1,26 +1,30 @@
-OOOOOOOOOOnnOOOOOOOOOOOOOOOOOOOnnOOOOOOOOOO
-O...................i.....................O
-O...................i.....................O
+###########################################
+#===^^^========---=====---==========^^^===#
+#===OOO===nn===---==I==---=====nn===OOO===#
+#=========nn========I==========nn=========#
+#I..................i....................I#
+#...................i.....................#
 W.................i.i.i...................E
-O................oooiooo..................O
-O..................ooo....................O
-O.........................................O
-O.........................................O
-O.........................................O
-OtttttttttttttttttttttttttttttttttttttttttO
-OoooooooooooooooooooooooooooooooooooooooooO
-OoooooooooooooooooooooooooooooooooooooooooO
-OtttttttttttttttttttttttttttttttttttttttttO
-O.....ooioo.....................ooioo.....O
-O.....ooioo.....................ooioo.....O
-O.....OOIOO.....................OOIOO.....O
-O.....O I O.....................O I O.....O
-O.....OOIOO.....................OOIOO.....O
-O.........................................O
-O.........................................O
-OOOOOOOOOOOOOOOOOOOOSOOOOOOOOOOOOOOOOOOOOOO
+#................ooooooo..................#
+#I.................ooo...................I#
+#.........................................#
+#I.......................................I#
+#.........................................#
+#ttttttttttttttttttttttttttttttttttttttttt#
+#ooooooooooooooooooooooooooooooooooooooooo#
+#ooooooooooooooooooooooooooooooooooooooooo#
+#ttttttttttttttttttttttttttttttttttttttttt#
+#.....ooioo.....................ooioo.....#
+#.....ooioo.....................ooioo.....#
+#.....OOIOO.....................OOIOO.....#
+#.....O I O.....................O I O.....#
+#.....OOIOO.....................OOIOO.....#
+#.........................................#
+#.........................................#
+#===================S=====================#
 
-CORRIDOR_A-CORRIDOR_B-GUEST_ROOM-ENTRYWAY
-0-0-1-0
-0
-It seems like this enormous hall only serves the purpose of intimidating the visitors with wealth.\It's only filled with decorations. You can't help but note the large chandelier.
+D|CORRIDOR_A-CORRIDOR_B-GUEST_ROOM-ENTRYWAY
+S|0-0-0-0
+K|0-0-1-0
+L|0
+C|It seems like this enormous hall only serves the purpose of intimidating the visitors with wealth.\It's only filled with decorations. You can't help but note the large chandelier.

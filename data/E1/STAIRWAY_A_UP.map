@@ -1,14 +1,18 @@
-OOOOOOOOOOOOnOOOO
-O...............O
+#################
+#===============#
+#===========_===#
+#===========n===#
+#...............#
 W...............e
-O...............O
-O...............O
-O...............O
-O......I--------O
-OMM.MM.I--------O
-OOOOOOOOSSSSSSSSO
+#...............#
+#...............#
+#...............#
+#......I--------#
+#MM.MM.I--------#
+#======ISSSSSSSS#
 
-EAST_WING-CORRIDOR_UC-STORAGE_B-STAIRWAY_A
-6-0-2-0
-0
-The stairs don't look as good from the upper floor.\The door on the north side looks a bit worn out.
+D|EAST_WING-CORRIDOR_UC-STORAGE_B-STAIRWAY_A
+S|0-0-0-1
+K|6-0-2-0
+L|0
+C|The stairs don't look as good from the upper floor.\The door on the north side looks a bit worn out.

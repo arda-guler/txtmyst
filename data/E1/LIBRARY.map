@@ -1,19 +1,20 @@
-               OOO                   
-               OtO                   
-               OoO                   
-OOOOOOONOOOOOOOOoOOOOOOOOOOOOOOOOOOOO
-O...........................!.......O
-O..TT......TT...TT...TT...TT...TT...O
-O..+T......TT...TT...TT...TT...+T...O
-O..TT......+T...TT...Tt...TT...Tt...O
-O..Tt......TT...Tt.!.+T...TT...tT...O
-O..T+......TT...TT...+T...Tt...TT...O
-O..tT......tT...Tt...TT...TT...T6...O
-O..TT......TT...TT...TT...TT...T+...O
-O....!..................A..!........O
-OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+###############OOO###################
+#==============OtO======HHHH===HHH==#
+#======_=======OoO======HHHH===HHH==#
+#======N=======OoO==================#
+#...........................!.......#
+#..TT......TT...TT...TT...TT...TT...#
+#..+T......TT...TT...TT...TT...+T...#
+#..TT......+T...TT...Tt...TT...Tt...#
+#..Tt......TT...Tt.!.+T...TT...tT...#
+#..T+......TT...TT...+T...Tt...TT...#
+#..tT......tT...Tt...TT...TT...T6...#
+#..TT......TT...TT...TT...TT...T+...#
+#....!..................A..!........#
+#===================================#
 
-0-0-CORRIDOR_UD-0
-0-0-0-0
-1
-There are tall bookshelves full of dust... and of course, books.\Inhaling this air might even be bad for your health, you think.
+D|0-0-CORRIDOR_UD-0
+S|0-0-0-0
+K|0-0-0-0
+L|1
+C|There are tall bookshelves full of dust... and of course, books.\Inhaling this air might even be bad for your health, you think.

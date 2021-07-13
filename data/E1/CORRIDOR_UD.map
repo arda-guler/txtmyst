@@ -1,14 +1,18 @@
-OOOOOOOOOOOOONOOOOOOOOOOOOOOOOOO
-O.ITI..I..I.....I..I..I..ITI...E
-O..............................E
-O..............................E
+################################
+#====HHH==============HHH======#
+#====HHH=====_========HHH======#
+#============N=================#
+#.ITI..I..I.....I..I..I..ITI...E
+#..............................E
+#..............................E
 w..............................E
-O..............OOO.............E
-O..............OOO.............E
-O..............OOOV.MM.m.......E
-OOOOOOOsOOOOOOOOOOOOOOOOOOOOOOOO
+#..............OOO.............E
+#..............OOO.............E
+#..............OOOV.MM.m.......E
+#======s=======OOO=============#
 
-CORRIDOR_UC-WEST_WING-BEDROOM_B-LIBRARY
-0-0-0-5
-0
-There is an odd-looking column next to the south wall of the corridor.
+D|CORRIDOR_UC-WEST_WING-BEDROOM_B-LIBRARY
+S|1-0-0-0
+K|0-0-0-5
+L|0
+C|There is an odd-looking column next to the south wall of the corridor.

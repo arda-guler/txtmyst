@@ -1,18 +1,21 @@
-OOOOOOOOOOOOOOOO
-OooooooooooooooO
-O..............O
-O.1............O
-O..............O
-OooooooooooooooO
-O..............O
-O..............O
-O..............O
-OooooooooooooooO
-O..............O
-O..............O
-OOOOOOOOSOOOOOOO
+################
+#==h===xxx=====#
+#==========xx==#
+#oooooooooooooo#
+#..............#
+#.1............#
+#..............#
+#oooooooooooooo#
+#..............#
+#..............#
+#..............#
+#oooooooooooooo#
+#..............#
+#..............#
+#=======S======#
 
-0-0-0-CORRIDOR_B
-0-0-0-0
-1
-It's quite dark in here.\You hope you won't accidentally run into something you shouldn't.
+D|0-0-0-CORRIDOR_B
+S|0-0-0-0
+K|0-0-0-0
+L|1
+C|It's quite dark in here.\You hope you won't accidentally run into something you shouldn't.

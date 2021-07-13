@@ -1,16 +1,20 @@
-OOOOOOOOOOOOOOOOOTTTTTTTTOOOOOOOOOOOOOOOOOO
-OII..............I......I...............OOO
-O...............................HH......OOO
-O.....TTTTT..............................iO
-O...[.TtttT.]..............B>...TT...<B..iO
-O.....TtTtT................B>...TT...<B..iO
-O...[.ttT3T.]..............B>...TT...<B..iO
-O.....TTTTT..............................iO
-O...............................HH......OOO
-OII.....................................OOO
-OOOOOOOOOOSSOOOOOOOOOOOOOOOOOOOSSOOOOOOOOOO
+###########################################
+#==----============TTTT=============----==#
+#==----============TTTT=============----==#
+#================TTT##TTT=================#
+#II..............I......I...............OO#
+#...............................HH......OO#
+#.....TTTTT..............................i#
+#...[.TtttT.]..............B>...TT...<B..i#
+#.....TtTtT................B>...TT...<B..i#
+#...[.ttT3T.]..............B>...TT...<B..i#
+#.....TTTTT..............................i#
+#...............................HH......OO#
+#II.....................................OO#
+#=========SS===================SS=========#
 
-0-0-0-HALL
-0-0-0-0
-0
-This is a neatly arranged room with lots of comfy stuff to sit on.\It also looks quite pretty with the fireplace and all.\You wish you could be their guest sometime.\...\...oh, right.
+D|0-0-0-HALL
+S|0-0-0-0
+K|0-0-0-0
+L|0
+C|This is a neatly arranged room with lots of comfy stuff to sit on.\It also looks quite pretty with the fireplace and all.\You wish you could be their guest sometime.\...\...oh, right.

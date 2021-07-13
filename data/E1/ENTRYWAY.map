@@ -1,16 +1,19 @@
-OOOOOOOOONOOOOOOOOO
-O.MMM.i.....i.MMM.O
-O.MMM.I.....I.MMM.O
-O.................O
-O.................O
-O.................O
-O.................O
-O.................O
-O........P........O
-O..TTTT.....TTTT..O
-OOOOOOOOOsOOOOOOOOO
+###################
+#========N========#
+#========N========#
+#.MMM.i.....i.MMM.#
+#.MMM.I.....I.MMM.#
+#.................#
+#.................#
+#.................#
+#.................#
+#.................#
+#........P........#
+#..TTTT.....TTTT..#
+#========s========#
 
-0-0-HALL-0
-0-0-0-0
-0
-It's the largest entryway to any residential building you've ever seen.\There are expensive looking decorations around.
+D|0-0-HALL-0
+S|0-0-0-0
+K|0-0-0-0
+L|0
+C|It's the largest entryway to any residential building you've ever seen.\There are expensive looking decorations around.

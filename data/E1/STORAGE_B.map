@@ -1,15 +1,19 @@
-OOOOOOOOOOOOOOOOOOOOOOO
-OTTttTT.....HH....JOOOO
-O.4...HHHHH.......JOOOO
-O.A......HHH......----O
-O...........---.......O
-OOOOOOOOOOOOOoooooooooO
-            OM........O
-            OM........O
-            OM........O
-            OOOOOOSOOOO
+#######################
+#=====================#
+#=====================#
+#=====================#
+#TTttTT.....HH....JOOO#
+#.4...HHHHH.......JOOO#
+#.A......HHH......----#
+#...........---.......#
+#===========#ooooooooo#
+            #M........#
+            #M........#
+            #M........#
+            #=====S===#
 
-0-0-0-STAIRWAY_A_UP
-0-0-0-0
-1
-The room is a mess.\\You also strongly feel a "presence" with you in here, as if there is\something lurking in the dark.
+D|0-0-0-STAIRWAY_A_UP
+S|0-0-0-0
+K|0-0-0-0
+L|1
+C|The room is a mess.\\You also strongly feel a "presence" with you in here, as if there is\something lurking in the dark.

@@ -34,7 +34,13 @@ frame_clock = 0
 
 # this is so that we don't read property lines as data
 # when loading new maps
-map_property_lines = 4 + 1
+
+# directions
+# keys
+# lighting
+# description
+# silent doors
+map_property_lines = 5 + 1
 
 class gameEpisode:
     def __init__(self, name, keys, backstory, ending, map_start, map_finish):
@@ -49,7 +55,9 @@ class gameEpisode:
         
 class gameMap:
     def __init__(self, data, name, size, east, west, north, south,
-                 key_east, key_west, key_north, key_south, dark, desc):
+                 key_east, key_west, key_north, key_south, dark, desc,
+                 east_silent, west_silent, north_silent, south_silent):
+        
         self.data = data
         self.name = name
         self.size = size
@@ -67,6 +75,11 @@ class gameMap:
         self.dark = dark
 
         self.desc = desc
+
+        self.east_silent = east_silent
+        self.west_silent = west_silent
+        self.north_silent = north_silent
+        self.south_silent = south_silent
 
 class player:
     def __init__(self, pos, inventory, health):
@@ -104,7 +117,8 @@ class statue(enemy):
 current_episode = gameEpisode(None, [], "", "", "", "")
 
 current_map = gameMap(None, None, None, None, None, None,\
-                      None, None, None, None, None, False, None)
+                      None, None, None, None, None, False, None,\
+                      None, None, None, None)
 
 player = player([0,0], [], 100)
 
@@ -176,30 +190,44 @@ def loadMap(m):
             statues[i].dormant = True
         num_of_statues -= 1
 
-    # when you add a new PROPERTY line, please re-check list indices
-    directions = map_lines[-map_property_lines+1].split("-")
+    # when you add a new PROPERTY line, please re-check property lines number
+    for line in map_lines:
+        if line[0:2] == "D|":
+            directions = line[2:-1].split("-")
+        elif line[0:2] == "K|":
+            keys = line[2:-1].split("-")
+        elif line[0:2] == "L|":
+            loaded_map_dark = bool(int(line[2:-1]))
+        elif line[0:2] == "C|":
+            loaded_map_desc = line[2:-1]
+        elif line[0:2] == "S|":
+            silent_doors = line[2:-1].split("-")
+
     loaded_map_east = directions[0]
     loaded_map_west = directions[1]
     loaded_map_north = directions[2]
-    loaded_map_south = directions[3][0:-1]
+    loaded_map_south = directions[3]
 
-    keys = map_lines[-map_property_lines+2].split("-")
     loaded_map_key_east = keys[0]
     loaded_map_key_west = keys[1]
     loaded_map_key_north = keys[2]
-    loaded_map_key_south = keys[3][0:-1]
+    loaded_map_key_south = keys[3]
 
-    loaded_map_dark = bool(int(map_lines[-map_property_lines+3][0:-1]))
+    loaded_map_east_silent = bool(int(silent_doors[0]))
+    loaded_map_west_silent = bool(int(silent_doors[1]))
+    loaded_map_north_silent = bool(int(silent_doors[2]))
+    loaded_map_south_silent = bool(int(silent_doors[3]))
 
     loaded_map_name = m
 
-    loaded_map_desc = map_lines[-map_property_lines+4][0:-1]
+    #loaded_map_desc = map_lines[-map_property_lines+4][0:-1]
 
     return loaded_map, loaded_map_name, map_size, loaded_map_east,\
            loaded_map_west, loaded_map_north, loaded_map_south,\
            loaded_map_key_east, loaded_map_key_west,\
            loaded_map_key_north, loaded_map_key_south, loaded_map_dark,\
-           loaded_map_desc
+           loaded_map_desc, loaded_map_east_silent, loaded_map_west_silent,\
+           loaded_map_north_silent, loaded_map_south_silent
 
 #-----------------------
 # MOVING THROUGH DOORS
@@ -212,7 +240,9 @@ def loadMap(m):
 
 def goEast():
     global current_map, player
-    playSfx("door", channel=1)
+
+    if not current_map.east_silent:
+        playSfx("door", channel=1)
 
     door_num = 0
 
@@ -222,7 +252,9 @@ def goEast():
     
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_map.east)
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc,\
+                      current_map.east_silent, current_map.west_silent, current_map.north_silent,\
+                      current_map.south_silent = loadMap(current_map.east)
 
     search_num = 0
 
@@ -236,7 +268,9 @@ def goEast():
 
 def goWest():
     global current_map, player
-    playSfx("door", channel=1)
+    
+    if not current_map.west_silent:
+        playSfx("door", channel=1)
 
     door_num = 0
 
@@ -246,7 +280,9 @@ def goWest():
             
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc  = loadMap(current_map.west)
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc,\
+                      current_map.east_silent, current_map.west_silent, current_map.north_silent,\
+                      current_map.south_silent  = loadMap(current_map.west)
 
     search_num = 0
 
@@ -260,7 +296,9 @@ def goWest():
 
 def goNorth():
     global current_map, player
-    playSfx("door", channel=1)
+
+    if not current_map.north_silent:
+        playSfx("door", channel=1)
 
     door_num = 0
 
@@ -270,7 +308,9 @@ def goNorth():
     
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_map.north)
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc,\
+                      current_map.east_silent, current_map.west_silent, current_map.north_silent,\
+                      current_map.south_silent = loadMap(current_map.north)
 
     search_num = 0
 
@@ -284,7 +324,9 @@ def goNorth():
 
 def goSouth():
     global current_map, player
-    playSfx("door", channel=1)
+
+    if not current_map.south_silent:
+        playSfx("door", channel=1)
 
     door_num = 0
 
@@ -294,7 +336,9 @@ def goSouth():
     
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_map.south)
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc,\
+                      current_map.east_silent, current_map.west_silent, current_map.north_silent,\
+                      current_map.south_silent = loadMap(current_map.south)
 
     search_num = 0
 
@@ -420,7 +464,9 @@ def loadEpisode(e):
     # place player in starting map
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
                       current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc = loadMap(current_episode.map_start)
+                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc,\
+                      current_map.east_silent, current_map.west_silent, current_map.north_silent,\
+                      current_map.south_silent = loadMap(current_episode.map_start)
 
     for y in range(current_map.size[0]):
         for x in range(current_map.size[1]):
@@ -830,6 +876,8 @@ def main():
             elif cmd == "restart" or cmd == "r":
                 print("\nRestarting episode...")
                 pygame.time.wait(1000)
+                player.inventory = []
+                frame_clock = 0
                 loadEpisode(current_episode.name)
 
             elif cmd == "agdqd":
@@ -860,12 +908,36 @@ def main():
     pygame.quit()
 
 def startGame():
-    
-    initSound()
     playSfx("thunder", -1, 6, 0.3)
     loadEpisode("E1")
     playBGM("bgm1")
 
     main()
 
-startGame()
+def mainMenu():
+    
+    while True:
+        system("cls")
+        system("color 7")
+        
+        print("\n    THE JUDGEMENT MOULD    ")
+        print("\n\n How do you wish to make\n your final mistake?")
+        print("\n (1) Start Game")
+        print(" (2) Quit")
+        menu_select = input("\n > ")
+
+        if menu_select == "1":
+            startGame()
+        elif menu_select == "2":
+            pygame.quit()
+            exit()
+        else:
+            print("Invalid selection.")
+            pygame.time.wait(3000)
+
+def initGame():
+    initSound()
+    #playBGM("menu")
+    mainMenu()
+
+initGame()

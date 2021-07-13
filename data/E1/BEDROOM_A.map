@@ -1,11 +1,15 @@
-OOOTTTOOOOOOOTTTOOOO
-Om......MMM.....V..O
-OHHHH..............O
-OHHHH..............O
-O............I.....O
-OTTTTTOOOOTTOOOOOSOO
+####################
+#==---=======---===#
+#==---===l===---===#
+#==TTT==^H^==TTT===#
+#m......MMM.....V..#
+#HHHH..............#
+#HHHH..............#
+#............I.....#
+#TTTTT====TT=====S=#
 
-0-0-0-CORRIDOR_UC
-0-0-0-0
-0
-This is a moderately sized bedroom.\There are wardrobes with clothes on its south side and some drawers and a mirror on north.
+D|0-0-0-CORRIDOR_UC
+S|0-0-0-0
+K|0-0-0-0
+L|0
+C|This is a moderately sized bedroom.\There are wardrobes with clothes on its south side and some drawers and a mirror on north.

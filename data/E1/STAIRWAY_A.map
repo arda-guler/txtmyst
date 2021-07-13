@@ -1,18 +1,20 @@
-OOOOOOOONNNNNNNNO
-O.MM.MMI--------O
-O......I--------O
-O......I--------O
-O......I--------O
-O......I--------O
-O......I--------O
-O...............O
-O...............O
-W...............O
-O...............O
-O...............O
-OOOOOOOOOOOOOOOOO
+#======I         
+#======INNNNNNNN#
+#.MM.MMI--------#
+#......I--------#
+#......I--------#
+#......I--------#
+#......I--------#
+#......I--------#
+#...............#
+#...............#
+W...............#
+#...............#
+#...............#
+#===============#
 
-0-CORRIDOR_A-STAIRWAY_A_UP-0
-0-0-0-0
-0
-You think this would be a nice, cozy place to sit down and read a good novel.
+D|0-CORRIDOR_A-STAIRWAY_A_UP-0
+S|0-0-1-0
+K|0-0-0-0
+L|0
+C|You think this would be a nice, cozy place to sit down and read a good novel.

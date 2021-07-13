@@ -1,16 +1,20 @@
-OOOOTTTTIOOOOOOITTTTOOOO
-O.mm....I.MMMM.I....mm.O
-O.........HHHH.........O
-O.........HHHH.........O
+########################
+#====--==========--====#
+#===----========----===#
+#===TTTTI======ITTTT===#
+#.mm....I.MMMM.I....mm.#
+#.........HHHH.........#
+#.........HHHH.........#
 T.........HHHH.........T
 T......................T
 T......................T
-O......................O
-OOOttttOOOOOOSOOOttttOOO
-OOOt2ttOOOOOO_OOOttttOOO
+#......................#
+#==tttt======S===tttt==#
+#==t2tt======_===tttt==#
                         
 
-0-0-0-CORRIDOR_UD
-0-0-0-0
-1
-This room is quite dark, but you can still make out the large bed in the middle.
+D|0-0-0-CORRIDOR_UD
+S|0-0-0-0
+K|0-0-0-0
+L|1
+C|This room is quite dark, but you can still make out the large bed in the middle.

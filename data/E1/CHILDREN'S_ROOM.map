@@ -1,12 +1,15 @@
-OOOOOOONOOOOOOOOOOOOO
-O.............Ttt5T.O
-O>....B>...h..TtTTT.O
-O>.............H....O
-O........JKL........O
-O..V.mm....HHH....uuO
-OOOOOOOOOOOOOOOOOOOOO
+#####################
+#======_============#
+#======N====h=======#
+#.............Ttt5T.#
+#>....B>...h..TtTTT.#
+#>.............H....#
+#........JKL........#
+#..V.mm....HHH....uu#
+#===================#
 
-0-0-CORRIDOR_UC-0
-0-0-0-0
-0
-There are toys and children's books all over the place.
+D|0-0-CORRIDOR_UC-0
+S|0-0-0-0
+K|0-0-0-0
+L|0
+C|There are toys and children's books all over the place.
