@@ -1,6 +1,11 @@
 MAP_START:ENTRYWAY
 MAP_FINISH:EAST_WING
 
+BGM:bgm1
+BGM_ENDING:bgm1
+
+E_NEXT:E2
+
 BACKSTORY
 You were making your way through a dirt road in the middle of nowhere, listening to the sounds of your vehicle's struggles.
 Neither the radio nor the phones would pick up anything, and the last sign of civilization you had seen, a petrol station, 

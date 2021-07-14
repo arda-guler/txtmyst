@@ -43,7 +43,8 @@ frame_clock = 0
 map_property_lines = 5 + 1
 
 class gameEpisode:
-    def __init__(self, name, keys, backstory, ending, map_start, map_finish):
+    def __init__(self, name, keys, backstory, ending, map_start, map_finish,
+                 bgm, bgm_ending, next_episode):
         self.name = name
         self.keys = keys
         
@@ -52,6 +53,11 @@ class gameEpisode:
         
         self.map_start = map_start
         self.map_finish = map_finish
+
+        self.bgm = bgm
+        self.bgm_ending = bgm_ending
+
+        self.next_episode = next_episode
         
 class gameMap:
     def __init__(self, data, name, size, east, west, north, south,
@@ -114,7 +120,7 @@ class statue(enemy):
 
 # lets get the instances ready
 
-current_episode = gameEpisode(None, [], "", "", "", "")
+current_episode = gameEpisode(None, [], "", "", "", "", "", "", "")
 
 current_map = gameMap(None, None, None, None, None, None,\
                       None, None, None, None, None, False, None,\
@@ -249,12 +255,15 @@ def goEast():
     for y in range(len(current_map.data)):
         if (("e" in current_map.data[y]) or ("E" in current_map.data[y])) and y <= player.pos[0]:
             door_num += 1
-    
-    current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
-                      current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc,\
-                      current_map.east_silent, current_map.west_silent, current_map.north_silent,\
-                      current_map.south_silent = loadMap(current_map.east)
+
+    try:
+        current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
+                          current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
+                          current_map.key_north, current_map.key_south, current_map.dark, current_map.desc,\
+                          current_map.east_silent, current_map.west_silent, current_map.north_silent,\
+                          current_map.south_silent = loadMap(current_map.east)
+    except:
+        return
 
     search_num = 0
 
@@ -278,11 +287,14 @@ def goWest():
         if (("w" in current_map.data[y]) or ("W" in current_map.data[y])) and y <= player.pos[0]:
             door_num += 1
             
-    current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
-                      current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc,\
-                      current_map.east_silent, current_map.west_silent, current_map.north_silent,\
-                      current_map.south_silent  = loadMap(current_map.west)
+    try:
+        current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
+                          current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
+                          current_map.key_north, current_map.key_south, current_map.dark, current_map.desc,\
+                          current_map.east_silent, current_map.west_silent, current_map.north_silent,\
+                          current_map.south_silent = loadMap(current_map.west)
+    except:
+        return
 
     search_num = 0
 
@@ -306,11 +318,14 @@ def goNorth():
         if (current_map.data[player.pos[0]-1][char] == "n" or current_map.data[player.pos[0]-1][char] == "N") and char <= player.pos[1]:
             door_num += 1
     
-    current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
-                      current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc,\
-                      current_map.east_silent, current_map.west_silent, current_map.north_silent,\
-                      current_map.south_silent = loadMap(current_map.north)
+    try:
+        current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
+                          current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
+                          current_map.key_north, current_map.key_south, current_map.dark, current_map.desc,\
+                          current_map.east_silent, current_map.west_silent, current_map.north_silent,\
+                          current_map.south_silent = loadMap(current_map.north)
+    except:
+        return
 
     search_num = 0
 
@@ -334,11 +349,14 @@ def goSouth():
         if (current_map.data[player.pos[0]+1][char] == "s" or current_map.data[player.pos[0]+1][char] == "S") and char <= player.pos[1]:
             door_num += 1
     
-    current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
-                      current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
-                      current_map.key_north, current_map.key_south, current_map.dark, current_map.desc,\
-                      current_map.east_silent, current_map.west_silent, current_map.north_silent,\
-                      current_map.south_silent = loadMap(current_map.south)
+    try:
+        current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
+                          current_map.north, current_map.south, current_map.key_east, current_map.key_west,\
+                          current_map.key_north, current_map.key_south, current_map.dark, current_map.desc,\
+                          current_map.east_silent, current_map.west_silent, current_map.north_silent,\
+                          current_map.south_silent = loadMap(current_map.south)
+    except:
+        return
 
     search_num = 0
 
@@ -431,6 +449,12 @@ def loadEpisode(e):
             episode_ending_start = i
         elif line[0:-1] == "END_ENDING":
             episode_ending_end = i
+        elif line[0:4] == "BGM:":
+            current_episode.bgm = line[4:-1]
+        elif line[0:11] == "BGM_ENDING:":
+            current_episode.bgm_ending = line[11:-1]
+        elif line[0:7] == "E_NEXT:":
+            current_episode.next_episode = line[7:-1]
 
     current_episode.backstory = ""
     for i in range(len(story_lines[episode_backstory_start:episode_backstory_end-1])):
@@ -460,6 +484,8 @@ def loadEpisode(e):
     print("Controls: WASD to move, t to enter command.\n\nEnter command 'help' to learn more.\n")
     input("Press enter to begin.")
     system("cls")
+
+    playBGM(current_episode.bgm)
     
     # place player in starting map
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
@@ -579,20 +605,18 @@ def gameOver(ending):
 
     elif ending == "ending":
         system("cls")
-        #playBGM("ending")
+        playBGM(current_episode.bgm_ending)
         print(current_episode.ending)
         pygame.time.wait(1000)
         flush_input()
-        input("What is the code for next episode?: ")
-        pygame.time.wait(1000)
-        pygame.quit()
-        exit()
+        input("Press Enter to continue...")
+        loadEpisode(current_episode.next_episode)
 
 # damage player from every possible cause
 # because there is no rest for the living
 
 def playerDamage():
-    global player, ghost_a, doll_a, frame_clock
+    global player, ghost_a, doll_a, frame_clock, current_map
 
     if frame_clock % 5 == 0:
 
@@ -611,6 +635,11 @@ def playerDamage():
 
         # note: statues don't deal damage
 
+        # floor damage, insta-death
+        floor = current_map.data[player.pos[0]][player.pos[1]]
+        if floor == "%" or floor == "$":
+            player.health -= 100
+            
     if player.health <= 0:
         gameOver("death")
 
@@ -664,6 +693,14 @@ def updateMap():
                         line += "+"
                     else:
                         line += "."
+
+                # dangerous floor, not hidden
+                elif this_char == "$":
+                    line += "H"
+
+                # dangerous floor, hidden
+                elif this_char == "%":
+                    line += "."
 
                 # regular floor
                 elif this_char == "." or this_char == "P":
@@ -754,7 +791,7 @@ def main():
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
                 next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
                 next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A" or
-                next_char == "!"):
+                next_char == "!" or next_char == "%" or next_char == "$"):
                 frame_movement[0] -= 1
                 
             elif next_char == "N":
@@ -768,7 +805,7 @@ def main():
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
                 next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
                 next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A" or
-                next_char == "!"):
+                next_char == "!" or next_char == "%" or next_char == "$"):
                 frame_movement[0] += 1
                 
             elif next_char == "S":
@@ -782,7 +819,7 @@ def main():
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
                 next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
                 next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A" or
-                next_char == "!"):
+                next_char == "!" or next_char == "%" or next_char == "$"):
                 frame_movement[1] += 1
                 
             elif next_char == "E":
@@ -796,7 +833,7 @@ def main():
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
                 next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
                 next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A" or
-                next_char == "!"):
+                next_char == "!" or next_char == "%" or next_char == "$"):
                 frame_movement[1] -= 1
                 
             elif next_char == "W":
@@ -811,7 +848,7 @@ def main():
                 next_char == "1" or next_char == "2" or next_char == "3" or next_char == "4" or
                 next_char == "5" or next_char == "6" or next_char == "7" or next_char == "8" or
                 next_char == "o" or next_char == "H" or next_char == "-" or next_char == "A" or
-                next_char == "!"):
+                next_char == "!" or next_char == "%" or next_char == "$"):
                 frame_movement = [0, 0]
 
         # player can't get past statues directly, but he can squish through corners
@@ -910,7 +947,6 @@ def main():
 def startGame():
     playSfx("thunder", -1, 6, 0.3)
     loadEpisode("E1")
-    playBGM("bgm1")
 
     main()
 
