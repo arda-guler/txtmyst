@@ -44,7 +44,7 @@ map_property_lines = 5 + 1
 
 class gameEpisode:
     def __init__(self, name, keys, backstory, ending, map_start, map_finish,
-                 bgm, bgm_ending, next_episode):
+                 bgm, bgm_backstory, bgm_ending, next_episode):
         self.name = name
         self.keys = keys
         
@@ -55,6 +55,7 @@ class gameEpisode:
         self.map_finish = map_finish
 
         self.bgm = bgm
+        self.bgm_backstory = bgm_backstory
         self.bgm_ending = bgm_ending
 
         self.next_episode = next_episode
@@ -120,7 +121,7 @@ class statue(enemy):
 
 # lets get the instances ready
 
-current_episode = gameEpisode(None, [], "", "", "", "", "", "", "")
+current_episode = gameEpisode(None, [], "", "", "", "", "", "", "", "")
 
 current_map = gameMap(None, None, None, None, None, None,\
                       None, None, None, None, None, False, None,\
@@ -453,6 +454,8 @@ def loadEpisode(e):
             current_episode.bgm = line[4:-1]
         elif line[0:11] == "BGM_ENDING:":
             current_episode.bgm_ending = line[11:-1]
+        elif line[0:14] == "BGM_BACKSTORY:":
+            current_episode.bgm_backstory = line[14:-1]
         elif line[0:7] == "E_NEXT:":
             current_episode.next_episode = line[7:-1]
 
@@ -460,9 +463,14 @@ def loadEpisode(e):
     for i in range(len(story_lines[episode_backstory_start:episode_backstory_end-1])):
         current_episode.backstory += story_lines[episode_backstory_start + i]
 
+    # split pages
+    current_episode.backstory = current_episode.backstory.split("---\n")
+
     current_episode.ending = ""
     for i in range(len(story_lines[episode_ending_start:episode_ending_end-1])):
         current_episode.ending += story_lines[episode_ending_start + i]
+
+    current_episode.ending = current_episode.ending.split("---\n")
 
     # read keys from episode.keys file
     current_episode.keys = []
@@ -476,16 +484,22 @@ def loadEpisode(e):
 
     # show controls and backstory
     # also show controls
-    system("cls")
-    print(current_episode.backstory)
-    pygame.time.wait(3000)
-    input("Press Enter to proceed.")
+    if not current_episode.bgm_backstory == "NONE":
+        playBGM(current_episode.bgm_backstory)
+    
+    for page in current_episode.backstory:
+        system("cls")
+        print(page)
+        pygame.time.wait(1000)
+        input("Press Enter to proceed.")
+    
     system("cls")
     print("Controls: WASD to move, t to enter command.\n\nEnter command 'help' to learn more.\n")
     input("Press enter to begin.")
     system("cls")
 
-    playBGM(current_episode.bgm)
+    if not current_episode.bgm == "NONE":
+        playBGM(current_episode.bgm)
     
     # place player in starting map
     current_map.data, current_map.name, current_map.size, current_map.east, current_map.west,\
@@ -600,17 +614,29 @@ def gameOver(ending):
         flush_input()
         input("Your last words?: ")
         pygame.time.wait(1000)
+        flush_input()
         pygame.quit()
         exit()
 
     elif ending == "ending":
         system("cls")
-        playBGM(current_episode.bgm_ending)
-        print(current_episode.ending)
-        pygame.time.wait(1000)
-        flush_input()
-        input("Press Enter to continue...")
-        loadEpisode(current_episode.next_episode)
+        
+        if not current_episode.bgm_ending == "NONE":
+            playBGM(current_episode.bgm_ending)
+            
+        for page in current_episode.ending:
+            system("cls")
+            print(page)
+            pygame.time.wait(1000)
+            flush_input()
+            input("Press Enter to continue...")
+            
+        if current_episode.next_episode:
+            loadEpisode(current_episode.next_episode)
+        else:
+            flush_input()
+            pygame.quit()
+            exit()
 
 # damage player from every possible cause
 # because there is no rest for the living
@@ -951,13 +977,14 @@ def startGame():
     main()
 
 def mainMenu():
+    playBGM("menu_sonata")
     
     while True:
         system("cls")
         system("color 7")
         
-        print("\n    THE JUDGEMENT MOULD    ")
-        print("\n\n How do you wish to make\n your final mistake?")
+        print("\n    THE JUDGEMENT COMMUNION    ")
+        print("\n How do you wish to make your final mistake?")
         print("\n (1) Start Game")
         print(" (2) Quit")
         menu_select = input("\n > ")
@@ -973,7 +1000,6 @@ def mainMenu():
 
 def initGame():
     initSound()
-    #playBGM("menu")
     mainMenu()
 
 initGame()

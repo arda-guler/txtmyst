@@ -2,7 +2,8 @@ MAP_START:ENTRYWAY
 MAP_FINISH:EAST_WING
 
 BGM:bgm1
-BGM_ENDING:bgm1
+BGM_BACKSTORY:NONE
+BGM_ENDING:NONE
 
 E_NEXT:E2
 
@@ -18,7 +19,7 @@ You were sure that this was the path they had described.
 
 Finally, after a couple of minutes, you saw a spark of yellow light in the distance, off to the right side of the path.
 This must have been it!
-
+---
 You sounded the siren a few times to indicate your arrival, and stopped the ambulance. "Let's go!" you said to the paramedic 
 in the passenger seat.
 
@@ -35,6 +36,12 @@ As you looked around in worry, the heavy door in the entrance shut close.
 END_BACKSTORY
 
 ENDING
-You manage to make your way to the east hall of the mansion, which reveals an even larger portion of the mansion to explore.
-Hoping to find someone or a way to get help, you wander further into the depths of the building. See you in Episode 2!
+You manage to make your way to the east wing of the building, which reveals an even larger portion of the mansion to explore.
+There is certainly something odd going on, but there is little time to hesitate.
+---
+You take a look at your phone in an attempt to call your colleague, only to be reminded that there is no signal coverage.
+"How did these people make the emergency call then?" you ask. The only answer you get is a loud, bright lightning strike that
+startles you. "That sounded way too close."
+---
+Hoping to find someone or a way to get some help, you decide to wander further into the depths of the building, alone.
 END_ENDING
